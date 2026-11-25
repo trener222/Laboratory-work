@@ -2,7 +2,6 @@
 import pandas as pd
 
 def prepare_trips(df):
-    # Проверяет типы, дубликаты и производные поля журнала рейсов.
     result = df.copy()
     result = result.drop_duplicates(subset=["trip_id"]).copy()
     numeric_cols = ["weight_t", "distance_km", "duration_h", "cost_rub", "delay_h"]

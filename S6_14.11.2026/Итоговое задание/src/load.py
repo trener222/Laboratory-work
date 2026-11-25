@@ -3,7 +3,6 @@ from pathlib import Path
 import pandas as pd
 
 def load_trips(path):
-    # Загружает журнал рейсов из CSV.
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"Файл с рейсами не найден: {path}")

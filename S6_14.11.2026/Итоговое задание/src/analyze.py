@@ -2,7 +2,6 @@
 import pandas as pd
 
 def descriptive_stats(df):
-    # Меры центра, разброса и положения для стоимости рейса.
     s = df["cost_rub"]
     q1, q3 = s.quantile(0.25), s.quantile(0.75)
     return {"mean": round(s.mean(), 1), "median": round(s.median(), 1),
