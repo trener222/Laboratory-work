@@ -7,6 +7,14 @@ from src.load import load_trips
 from src.prepare import prepare_trips
 from src.analyze import descriptive_stats, overall_kpi, kpi_by_carrier, monthly_kpi
 
+def df_to_markdown(df):
+    '''Превращает таблицу в markdown без внешних зависимостей.'''
+    header = "| " + " | ".join(str(c) for c in df.columns) + " |"
+    sep = "|" + "---|" * len(df.columns)
+    rows = ["| " + " | ".join(str(v) for v in row) + " |"
+            for row in df.itertuples(index=False)]
+    return chr(10).join([header, sep] + rows)
+
 def main():
     Path(config.PROCESSED_DIR).mkdir(parents=True, exist_ok=True)
     Path(config.REPORTS_DIR).mkdir(parents=True, exist_ok=True)
@@ -26,12 +34,15 @@ def main():
     freq["trip_share_percent"] = (freq["trips"] / len(df) * 100).round(1)
     freq["revenue_share_percent"] = (freq["revenue"] / df["cost_rub"].sum() * 100).round(1)
     freq.to_csv(Path(config.PROCESSED_DIR) / "cost_frequency.csv", encoding="utf-8")
-    lines = ["# Отчёт по анализу перевозок (LW1 / практика 10)", "", "## Описательная статистика стоимости рейса"]
+    
+    lines = ["# Отчёт по анализу перевозок практика 10", "", "## Описательная статистика стоимости рейса"]
     lines += [f"- {key}: {value}" for key, value in stats.items()]
     lines += ["", "## Общие KPI"] + [f"- {key}: {value}" for key, value in kpi.items()]
-    lines += ["", "## KPI по перевозчикам", carrier.to_string()]
-    lines += ["", "## KPI по месяцам", month.to_string()]
-    lines += ["", "## Распределение стоимости", freq.to_string()]
+  
+    lines += ["", "## KPI по перевозчикам", df_to_markdown(carrier.reset_index())]
+    lines += ["", "## KPI по месяцам", df_to_markdown(month.reset_index())]
+    lines += ["", "## Распределение стоимости", df_to_markdown(freq.reset_index())]
+    
     lines += ["", "## Вывод", "Стоимость рейсов имеет заметный разброс; для типичного уровня стоимости следует смотреть на медиану вместе со средним. OTD показывает долю рейсов без задержек. Таблицы по перевозчикам и месяцам позволяют сравнивать выручку, средний чек и своевременность доставки."]
     report_path = Path(config.REPORTS_DIR) / "report.md"
     report_path.write_text("\n".join(lines), encoding="utf-8")
@@ -42,6 +53,7 @@ def main():
     print("Отчёт:", report_path)
     print("KPI:", kpi)
     return manifest
+
 
 if __name__ == "__main__":
     main()
